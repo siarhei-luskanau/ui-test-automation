@@ -85,3 +85,21 @@ jobs:
 
       - run: ./gradlew :composeApp:jsMainClasses --stacktrace
         working-directory: Multiplatform-App
+
+
+
+  Automation:
+    needs: Android
+    runs-on: macos-latest
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciTest --stacktrace
