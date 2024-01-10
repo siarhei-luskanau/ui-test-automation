@@ -1,6 +1,7 @@
 import java.io.File
 import java.util.Properties
 import org.apache.tools.ant.taskdefs.condition.Os
+import java.io.ByteArrayOutputStream
 
 val ciGroup = "CI_GRADLE"
 
@@ -11,6 +12,65 @@ tasks.register("ciTest") {
             "help"
         )
     }
+}
+
+tasks.register("ciIos") {
+    group = ciGroup
+    doLast {
+        if (Os.isFamily(Os.FAMILY_MAC)) {
+            runExec(listOf("brew", "install", "kdoctor"))
+            runExec(listOf("kdoctor"))
+            val deviceId = runExec(
+                listOf(
+                    "xcrun",
+                    "simctl",
+                    "list",
+                    "devices",
+                    "available"
+                )
+            )
+                .lines()
+                .filter {
+                    listOf("iphone 15", "iphone 14").any { device -> it.contains(device, true) } &&
+                            it.contains("(") && it.contains(")")
+                }
+                .map { it.substring(startIndex = it.indexOf("(") + 1, endIndex = it.indexOf(")")) }
+                .firstOrNull()
+            runExec(
+                listOf(
+                    "xcodebuild",
+                    "-project",
+                    "${rootDir.path}/Multiplatform-App/iosApp/iosApp.xcodeproj",
+                    "-scheme",
+                    "iosApp",
+                    "-configuration",
+                    "Debug",
+                    "OBJROOT=${rootDir.path}/build/ios",
+                    "SYMROOT=${rootDir.path}/build/ios",
+                    "-destination",
+                    "id=$deviceId",
+                    "-allowProvisioningDeviceRegistration",
+                    "-allowProvisioningUpdates"
+                )
+            )
+        }
+    }
+}
+
+fun runExec(commands: List<String>): String = ByteArrayOutputStream().let { resultOutputStream ->
+    exec {
+        if (System.getenv("JAVA_HOME") == null) {
+            System.getProperty("java.home")?.let { javaHome ->
+                environment = environment.toMutableMap().apply {
+                    put("JAVA_HOME", javaHome)
+                }
+            }
+        }
+        commandLine = commands
+        standardOutput = resultOutputStream
+        println("commandLine: ${this.commandLine.joinToString(separator = " ")}")
+    }.apply { println("ExecResult: $this") }
+    String(resultOutputStream.toByteArray()).trim().also { println(it) }
 }
 
 fun gradlew(vararg tasks: String, addToSystemProperties: Map<String, String>? = null) {
