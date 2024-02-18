@@ -1,9 +1,6 @@
-rootProject.name = "UiTestAutomation"
-include()
-
 pluginManagement {
-    includeBuild("convention-android-emulator")
     repositories {
+        google()
         gradlePluginPortal()
         mavenCentral()
     }
@@ -11,6 +8,12 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        google()
         mavenCentral()
+    }
+    versionCatalogs {
+        create("buildSrcLibs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }

@@ -106,7 +106,7 @@ jobs:
 
 
   Automation:
-    needs: [ Android, iOS ]
+    needs: [ Android ]
     runs-on: macos-latest
     steps:
 
