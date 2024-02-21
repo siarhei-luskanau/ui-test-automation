@@ -6,14 +6,18 @@ import java.io.InputStream
 import java.net.URL
 import java.util.zip.ZipFile
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.gradle.kotlin.dsl.provideDelegate
 
 class AndroidSdkHelper(
-    private val rootDir: File,
+    rootDir: File,
     private val execWrapper: ExecWrapper
 ) {
 
-    private val androidSdkConfig by lazy { AndroidSdkConfig(rootDir = rootDir) }
+    private val androidSdkConfig = AndroidSdkConfig(rootDir = rootDir)
+    private val addToSystemEnvironment = mapOf(
+        "HOME" to System.getenv("HOME"),
+        "ANDROID_SDK_HOME" to androidSdkConfig.sdkDirPath,
+        "ANDROID_AVD_HOME" to "$rootDir/.android/avd"
+    ).filterValues { it.isNotEmpty() }
 
     fun setupAndroidCmdlineTools() {
         androidSdkConfig.printSdkPath()
@@ -80,7 +84,7 @@ class AndroidSdkHelper(
                 "--sdk_root=${androidSdkConfig.sdkDirPath}"
             ),
             inputStream = yesInputStream()
-        ).also { println("ExecOutput: $it") }
+        ) // .also { println("ExecOutput: $it") }
     }
 
     fun setupAndroidSDK(avdName: String? = null) {
@@ -106,6 +110,7 @@ class AndroidSdkHelper(
         execWrapper.exec(
             commandLine = mutableListOf(
                 androidSdkConfig.sdkmanager.absolutePath,
+                "tools",
                 "platform-tools",
                 "build-tools;${AndroidSdkConst.BUILD_TOOLS_VERSION}",
                 "platforms;android-${AndroidSdkConst.PLATFORM}"
@@ -119,7 +124,7 @@ class AndroidSdkHelper(
                 add("--sdk_root=${androidSdkConfig.sdkDirPath}")
             },
             inputStream = yesInputStream()
-        ).also { println("ExecOutput: $it") }
+        ) // .also { println("ExecOutput: $it") }
 
         execWrapper.exec(
             commandLine = listOf(
@@ -153,12 +158,18 @@ class AndroidSdkHelper(
                     emulatorConfig.deviceType,
                     "-k",
                     emulatorConfig.sdkId
-                )
+                ),
+                addToSystemEnvironment = addToSystemEnvironment
             ).also { println("ExecOutput: $it") }
         }
 
         execWrapper.exec(
-            commandLine = listOf(androidSdkConfig.avdmanager.absolutePath, "-v", "list", "avd")
+            commandLine = listOf(androidSdkConfig.avdmanager.absolutePath, "-v", "list", "avd"),
+            addToSystemEnvironment = addToSystemEnvironment
+        ).also { println("ExecOutput: $it") }
+        execWrapper.exec(
+            commandLine = listOf(androidSdkConfig.emulator.absolutePath, "-list-avds"),
+            addToSystemEnvironment = addToSystemEnvironment
         ).also { println("ExecOutput: $it") }
     }
 
@@ -179,11 +190,11 @@ class AndroidSdkHelper(
             emulatorConfig.port
         )
         commandArgs.addAll(
-            listOf(
+            mutableListOf(
                 "-accel",
                 "auto",
                 "-gpu",
-                "auto",
+                "swiftshader_indirect",
                 "-dns-server",
                 "8.8.8.8",
                 "-no-audio",
@@ -191,10 +202,15 @@ class AndroidSdkHelper(
                 "-screen",
                 "multi-touch",
                 "-no-snapshot"
-            )
+            ).also {
+                if (true.toString().equals(other = System.getenv("CI"), ignoreCase = true)) {
+                    it.add("-no-window")
+                }
+            }
         )
         execWrapper.exec(
-            commandLine = commandArgs
+            commandLine = commandArgs,
+            addToSystemEnvironment = addToSystemEnvironment
         ).also { println("ExecOutput: $it") }
     }
 
@@ -264,13 +280,15 @@ class AndroidSdkHelper(
                         "avd",
                         "-n",
                         emulatorConfig.avdName
-                    )
+                    ),
+                    addToSystemEnvironment = addToSystemEnvironment
                 ).also { println("ExecOutput: $it") }
             }
         }
 
         execWrapper.exec(
-            commandLine = listOf(androidSdkConfig.avdmanager.absolutePath, "-v", "list", "avd")
+            commandLine = listOf(androidSdkConfig.avdmanager.absolutePath, "-v", "list", "avd"),
+            addToSystemEnvironment = addToSystemEnvironment
         ).also { println("ExecOutput: $it") }
     }
 

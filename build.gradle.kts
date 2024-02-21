@@ -6,6 +6,10 @@ import java.io.InputStream
 import java.util.Properties
 import org.apache.tools.ant.taskdefs.condition.Os
 
+println("gradle.startParameter.taskNames: ${gradle.startParameter.taskNames}")
+System.getProperties().forEach { key, value -> println("System.getProperties(): $key=$value") }
+System.getenv().forEach { (key, value) -> println("System.getenv(): $key=$value") }
+
 plugins {
     id("androidEmulatorConvention")
 }
@@ -20,8 +24,15 @@ tasks.register("ciTest") {
     group = ciGroup
     doLast {
         val execWrapper: ExecWrapper = object : ExecWrapper {
-            override fun exec(commandLine: List<String>, inputStream: InputStream?): String =
-                runExec(commands = commandLine, inputStream = inputStream)
+            override fun exec(
+                commandLine: List<String>,
+                inputStream: InputStream?,
+                addToSystemEnvironment: Map<String, String>?
+            ): String = runExec(
+                commands = commandLine,
+                inputStream = inputStream,
+                addToSystemEnvironment = addToSystemEnvironment
+            )
         }
         AndroidSdkHelper(
             rootDir = rootDir,
@@ -89,23 +100,29 @@ tasks.register("ciIos") {
     }
 }
 
-fun runExec(commands: List<String>, inputStream: InputStream? = null): String =
-    ByteArrayOutputStream().let { resultOutputStream ->
-        exec {
+fun runExec(
+    commands: List<String>,
+    inputStream: InputStream? = null,
+    addToSystemEnvironment: Map<String, String>? = null
+): String = ByteArrayOutputStream().let { resultOutputStream ->
+    exec {
+        commandLine = commands
+        workingDir = rootDir
+        environment = environment.toMutableMap().apply {
+            System.getenv("HOME")?.also { put("HOME", it) }
             if (System.getenv("JAVA_HOME") == null) {
                 System.getProperty("java.home")?.let { javaHome ->
-                    environment = environment.toMutableMap().apply {
-                        put("JAVA_HOME", javaHome)
-                    }
+                    put("JAVA_HOME", javaHome)
                 }
             }
-            commandLine = commands
-            inputStream?.also { standardInput = inputStream }
-            standardOutput = resultOutputStream
-            println("commandLine: ${this.commandLine.joinToString(separator = " ")}")
-        }.apply { println("ExecResult: $this") }
-        String(resultOutputStream.toByteArray()).trim().also { println(it) }
-    }
+            addToSystemEnvironment?.also { putAll(addToSystemEnvironment) }
+        }
+        inputStream?.also { standardInput = inputStream }
+        standardOutput = resultOutputStream
+        println("commandLine: ${this.commandLine.joinToString(separator = " ")}")
+    }.apply { println("ExecResult: $this") }
+    String(resultOutputStream.toByteArray()).trim().also { println(it) }
+}
 
 fun gradlew(vararg tasks: String, addToSystemProperties: Map<String, String>? = null) {
     exec {
