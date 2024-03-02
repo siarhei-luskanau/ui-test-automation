@@ -1,10 +1,16 @@
 [versions]
-kotlin = "1.9.22"
-ktlint = "1.1.1"
+appium = "9.1.0"
+appium-npm = "2.5.1"
+build-javaVersion = "VERSION_11"
+build-jvmTarget = "11"
+kotlin = "1.9.23"
+ktlint = "1.2.1"
 
 [libraries]
+appium-java-client = { module = "io.appium:java-client", version.ref = "appium" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
 
 [plugins]
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

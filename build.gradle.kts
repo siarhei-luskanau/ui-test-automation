@@ -1,5 +1,5 @@
 import convention.android.emulator.AndroidSdkHelper
-import convention.android.emulator.ExecWrapper
+import convention.environment.setup.EnvironmentSetupManager
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
@@ -11,7 +11,9 @@ System.getProperties().forEach { key, value -> println("System.getProperties(): 
 System.getenv().forEach { (key, value) -> println("System.getenv(): $key=$value") }
 
 plugins {
+    alias(libs.plugins.kotlin.jvm)
     id("androidEmulatorConvention")
+    id("environmentSetupConvention")
 }
 
 allprojects {
@@ -23,27 +25,46 @@ val ciGroup = "CI_GRADLE"
 tasks.register("ciTest") {
     group = ciGroup
     doLast {
-        val execWrapper: ExecWrapper = object : ExecWrapper {
-            override fun exec(
-                commandLine: List<String>,
-                inputStream: InputStream?,
-                addToSystemEnvironment: Map<String, String>?
-            ): String = runExec(
-                commands = commandLine,
-                inputStream = inputStream,
-                addToSystemEnvironment = addToSystemEnvironment
-            )
-        }
+        val environmentSetupExecWrapper: convention.environment.setup.ExecWrapper =
+            object : convention.environment.setup.ExecWrapper {
+                override fun exec(
+                    commandLine: List<String>,
+                    inputStream: InputStream?,
+                    addToSystemEnvironment: Map<String, String>?
+                ): String = runExec(
+                    commands = commandLine,
+                    inputStream = inputStream,
+                    addToSystemEnvironment = addToSystemEnvironment
+                )
+            }
+        EnvironmentSetupManager(execWrapper = environmentSetupExecWrapper).setupDependencies(
+            appiumVersion = libs.versions.appium.npm.get()
+        )
+
+        val androidEmulatorExecWrapper: convention.android.emulator.ExecWrapper =
+            object : convention.android.emulator.ExecWrapper {
+                override fun exec(
+                    commandLine: List<String>,
+                    inputStream: InputStream?,
+                    addToSystemEnvironment: Map<String, String>?
+                ): String = runExec(
+                    commands = commandLine,
+                    inputStream = inputStream,
+                    addToSystemEnvironment = addToSystemEnvironment
+                )
+            }
         AndroidSdkHelper(
             rootDir = rootDir,
-            execWrapper = execWrapper
+            execWrapper = androidEmulatorExecWrapper
         ).also {
             it.setupAndroidCmdlineTools()
             val avdName = when (val osArch = System.getProperty("os.arch")) {
                 "x86", "i386", "ia-32", "i686", "x86_64", "amd64", "x64", "x86-64" ->
                     "test_android_emulator_x86_64"
+
                 "arm", "arm-v7", "armv7", "arm32", "arm64", "arm-v8", "aarch64" ->
                     "test_android_emulator_arm64-v8a"
+
                 else ->
                     throw Error("Unexpected System.getProperty(\"os.arch\") = $osArch")
             }
@@ -54,6 +75,16 @@ tasks.register("ciTest") {
             it.killAndroidEmulator()
             it.deleteAndroidEmulator()
         }
+    }
+}
+
+tasks.register("ciAndroid") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            "assembleDebug",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
     }
 }
 
@@ -124,7 +155,11 @@ fun runExec(
     String(resultOutputStream.toByteArray()).trim().also { println(it) }
 }
 
-fun gradlew(vararg tasks: String, addToSystemProperties: Map<String, String>? = null) {
+fun gradlew(
+    vararg tasks: String,
+    addToSystemProperties: Map<String, String>? = null,
+    workingDirectory: File? = null
+) {
     exec {
         executable = File(
             project.rootDir,
@@ -139,6 +174,7 @@ fun gradlew(vararg tasks: String, addToSystemProperties: Map<String, String>? = 
             }
             mutableArgs.add("--stacktrace")
         }
+        workingDirectory?.also { workingDir = workingDirectory }
         val sdkDirPath = Properties().apply {
             val propertiesFile = File(rootDir, "local.properties")
             if (propertiesFile.exists()) {

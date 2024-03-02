@@ -1,11 +1,4 @@
-rootProject.name = "UiTestAutomation"
-include(
-    "test"
-)
-
 pluginManagement {
-    includeBuild("convention-android-emulator")
-    includeBuild("convention-environment-setup")
     repositories {
         gradlePluginPortal()
         mavenCentral()
@@ -15,5 +8,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
+    }
+    versionCatalogs {
+        create("buildSrcLibs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }

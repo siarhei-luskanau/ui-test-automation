@@ -51,8 +51,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - run: ./gradlew assembleDebug --stacktrace
-        working-directory: Multiplatform-App
+      - run: ./gradlew ciAndroid --stacktrace
 
 
 
@@ -133,6 +132,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: Homebrew/actions/setup-homebrew@master
 
       - uses: gradle/gradle-build-action@v2
         with:
