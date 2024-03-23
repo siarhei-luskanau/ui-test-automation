@@ -1,4 +1,8 @@
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import com.android.build.api.dsl.ManagedVirtualDevice
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.multiplatform)
@@ -10,7 +14,17 @@ kotlin {
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "17"
+                jvmTarget = "${JavaVersion.VERSION_1_8}"
+                freeCompilerArgs += "-Xjdk-release=${JavaVersion.VERSION_1_8}"
+            }
+        }
+        //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        instrumentedTestVariant {
+            sourceSetTree.set(KotlinSourceSetTree.test)
+            dependencies {
+                debugImplementation(libs.androidx.testManifest)
+                implementation(libs.androidx.junit4)
             }
         }
     }
@@ -18,6 +32,11 @@ kotlin {
     jvm()
 
     js {
+        browser()
+        binaries.executable()
+    }
+
+    wasmJs {
         browser()
         binaries.executable()
     }
@@ -41,24 +60,24 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(compose.runtime)
+            implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
         }
 
-        commonTest.dependencies {
+        androidNativeTest.dependencies {
             implementation(kotlin("test"))
+            @OptIn(ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
+            implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
-            implementation(libs.compose.uitooling)
         }
 
         jvmMain.dependencies {
-            implementation(compose.desktop.common)
             implementation(compose.desktop.currentOs)
         }
 
@@ -68,6 +87,7 @@ kotlin {
 
         iosMain.dependencies {
         }
+
     }
 }
 
@@ -82,21 +102,33 @@ android {
         applicationId = "org.company.app.androidApp"
         versionCode = 1
         versionName = "1.0.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        res.srcDirs("src/androidMain/resources")
-        resources.srcDirs("src/commonMain/resources")
+        res.srcDirs("src/androidMain/res")
+    }
+    //https://developer.android.com/studio/test/gradle-managed-devices
+    @Suppress("UnstableApiUsage")
+    testOptions {
+        managedDevices.devices {
+            maybeCreate<ManagedVirtualDevice>("pixel5").apply {
+                device = "Pixel 5"
+                apiLevel = 34
+                systemImageSource = "aosp"
+            }
+        }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
 }
 

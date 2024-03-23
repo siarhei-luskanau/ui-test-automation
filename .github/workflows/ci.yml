@@ -9,7 +9,11 @@ jobs:
 
 
   Lint:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
     steps:
 
       - uses: actions/checkout@v3
@@ -25,7 +29,11 @@ jobs:
 
 
   UnitTest:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
     steps:
 
       - uses: actions/checkout@v3
@@ -56,7 +64,11 @@ jobs:
 
 
   Desktop:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
     steps:
 
       - uses: actions/checkout@v3
@@ -72,7 +84,11 @@ jobs:
 
 
   Browser:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
     steps:
 
       - uses: actions/checkout@v3

@@ -1,8 +1,8 @@
 [versions]
 appium = "9.1.0"
 appium-npm = "2.5.1"
-build-javaVersion = "VERSION_11"
-build-jvmTarget = "11"
+build-javaVersion = "VERSION_17"
+build-jvmTarget = "17"
 kotlin = "1.9.23"
 ktlint = "1.2.1"
 

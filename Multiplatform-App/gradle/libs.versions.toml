@@ -1,17 +1,16 @@
 [versions]
 
-kotlin = "1.9.21"
-compose = "1.5.11"
-agp = "8.2.0"
-androidx-appcompat = "1.6.1"
-androidx-activityCompose = "1.8.1"
-compose-uitooling = "1.5.4"
+kotlin = "1.9.23"
+compose = "1.6.1"
+agp = "8.3.1"
+androidx-activityCompose = "1.8.2"
+androidx-uiTest = "1.6.4"
 
 [libraries]
 
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
-compose-uitooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-uitooling" }
+androidx-testManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-uiTest" }
+androidx-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-uiTest" }
 
 [plugins]
 
