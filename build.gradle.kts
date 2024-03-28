@@ -88,6 +88,16 @@ tasks.register("ciAndroid") {
     }
 }
 
+tasks.register("ciAndroidInstrumentalTest") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            ":composeApp:pixel5Check",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+    }
+}
+
 tasks.register("ciIos") {
     group = ciGroup
     doLast {
