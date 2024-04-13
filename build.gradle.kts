@@ -22,7 +22,49 @@ allprojects {
 
 val ciGroup = "CI_GRADLE"
 
-tasks.register("ciTest") {
+tasks.register("ciLint") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            "lint",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+    }
+}
+
+tasks.register("ciUnitTest") {
+    group = ciGroup
+    doLast {
+        runCatching {
+            gradlew(
+                "check",
+                workingDirectory = File(rootDir, "Multiplatform-App")
+            )
+        }
+    }
+}
+
+tasks.register("ciDesktop") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            ":composeApp:jvmJar",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+    }
+}
+
+tasks.register("ciBrowser") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            ":composeApp:jsMainClasses",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+    }
+}
+
+tasks.register("ciAutomationTest") {
     group = ciGroup
     doLast {
         val environmentSetupExecWrapper: convention.environment.setup.ExecWrapper =

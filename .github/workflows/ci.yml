@@ -23,8 +23,9 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - run: ./gradlew lint --stacktrace
-        working-directory: Multiplatform-App
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciLint --stacktrace
 
 
 
@@ -43,8 +44,9 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - run: ./gradlew check --stacktrace
-        working-directory: Multiplatform-App
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciUnitTest --stacktrace
 
 
 
@@ -65,9 +67,13 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - run: ./gradlew ciAndroid --stacktrace
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciAndroid --stacktrace
 
-      - run: ./gradlew ciAndroidInstrumentalTest --stacktrace
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciAndroidInstrumentalTest --stacktrace
 
 
 
@@ -86,8 +92,9 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - run: ./gradlew :composeApp:jvmJar --stacktrace
-        working-directory: Multiplatform-App
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciDesktop --stacktrace
 
 
 
@@ -106,8 +113,9 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - run: ./gradlew :composeApp:jsMainClasses --stacktrace
-        working-directory: Multiplatform-App
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ciBrowser --stacktrace
 
 
 
@@ -161,4 +169,4 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: ciTest --stacktrace
+          arguments: ciAutomationTest --stacktrace
