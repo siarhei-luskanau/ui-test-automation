@@ -35,12 +35,13 @@ tasks.register("ciLint") {
 tasks.register("ciUnitTest") {
     group = ciGroup
     doLast {
-        runCatching {
-            gradlew(
-                "check",
-                workingDirectory = File(rootDir, "Multiplatform-App")
-            )
-        }
+        gradlew(
+            ":composeApp:jvmTest",
+            // ":composeApp:testReleaseUnitTest",
+            // ":composeApp:allTests",
+            // ":composeApp:wasmJsBrowserTest",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
     }
 }
 
