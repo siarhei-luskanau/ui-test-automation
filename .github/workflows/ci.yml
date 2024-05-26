@@ -16,14 +16,14 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciLint --stacktrace
 
@@ -37,14 +37,14 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciUnitTest --stacktrace
 
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Enable KVM group perms
         run: |
@@ -62,16 +62,16 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciAndroid --stacktrace
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciAndroidInstrumentalTest --stacktrace
 
@@ -85,14 +85,14 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciDesktop --stacktrace
 
@@ -106,14 +106,14 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciBrowser --stacktrace
 
@@ -123,14 +123,14 @@ jobs:
     runs-on: macos-latest
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciIos --stacktrace
 
@@ -145,7 +145,7 @@ jobs:
         os: [ ubuntu-latest ]
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Enable KVM group perms
         if: contains(matrix.os, 'ubuntu')
@@ -160,13 +160,13 @@ jobs:
           sudo apt update
           sudo apt install libpulse-dev
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
       - uses: Homebrew/actions/setup-homebrew@master
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         with:
           arguments: ciAutomationTest --stacktrace
