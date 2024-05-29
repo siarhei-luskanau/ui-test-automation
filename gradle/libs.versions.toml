@@ -1,5 +1,5 @@
 [versions]
-appium = "9.2.2"
+appium = "9.2.3"
 appium-npm = "2.5.4"
 build-javaVersion = "VERSION_17"
 build-jvmTarget = "17"
