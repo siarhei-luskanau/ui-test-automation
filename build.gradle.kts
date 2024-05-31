@@ -37,11 +37,24 @@ tasks.register("ciUnitTest") {
     doLast {
         gradlew(
             ":composeApp:jvmTest",
-            // ":composeApp:testReleaseUnitTest",
-            // ":composeApp:allTests",
+            // ":composeApp:jsBrowserTest",
             // ":composeApp:wasmJsBrowserTest",
+            // ":composeApp:testReleaseUnitTest",
             workingDirectory = File(rootDir, "Multiplatform-App")
         )
+        when (val osArch = System.getProperty("os.arch")) {
+            "x86", "i386", "ia-32", "i686",
+            "x86_64", "amd64", "x64", "x86-64" -> ":composeApp:iosSimulatorX64Test"
+
+            "arm", "arm-v7", "armv7", "arm32",
+            "arm64", "arm-v8", "aarch64" -> ":composeApp:iosSimulatorArm64Test"
+
+            else -> throw Error(
+                "Unexpected System.getProperty(\"os.arch\") = $osArch"
+            )
+        }.let {
+            gradlew(it, workingDirectory = File(rootDir, "Multiplatform-App"))
+        }
     }
 }
 
