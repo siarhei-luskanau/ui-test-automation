@@ -5,6 +5,7 @@ include(
 
 pluginManagement {
     includeBuild("convention-android-emulator")
+    includeBuild("convention-automation-core")
     includeBuild("convention-environment-setup")
     repositories {
         gradlePluginPortal()

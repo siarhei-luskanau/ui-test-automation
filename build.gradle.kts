@@ -22,6 +22,25 @@ allprojects {
 
 val ciGroup = "CI_GRADLE"
 
+tasks.register("devAll") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            "clean",
+            "ktlintFormat"
+        )
+        gradlew(
+            "ciLint",
+            "ciUnitTest",
+            "ciAndroid",
+            "ciDesktop",
+            "ciIos",
+            "ciBrowser"
+        )
+        gradlew("ciAndroidInstrumentalTest")
+        gradlew("ciAutomationTest")
+    }
+}
 tasks.register("ciLint") {
     group = ciGroup
     doLast {
