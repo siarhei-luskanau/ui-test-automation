@@ -61,6 +61,21 @@ tasks.register("ciAutomationTest") {
             appiumVersion = libs.versions.appium.npm.get()
         )
 
+        runCatching { runExec(commands = listOf("pkill", "-9", "-f", "appium")) }
+        Thread {
+            runCatching {
+                runExec(
+                    commands = listOf(
+                        "appium",
+                        "--address",
+                        "127.0.0.1",
+                        "--port",
+                        "4723"
+                    )
+                )
+            }
+        }.start()
+
         val androidEmulatorExecWrapper: convention.android.emulator.ExecWrapper =
             object : convention.android.emulator.ExecWrapper {
                 override fun exec(
@@ -73,11 +88,11 @@ tasks.register("ciAutomationTest") {
                     addToSystemEnvironment = addToSystemEnvironment
                 )
             }
-        AndroidSdkHelper(
+        val androidSdkHelper = AndroidSdkHelper(
             rootDir = rootDir,
             execWrapper = androidEmulatorExecWrapper
-        ).also {
-            it.setupAndroidCmdlineTools()
+        ).also { androidSdkHelper ->
+            androidSdkHelper.setupAndroidCmdlineTools()
             val avdName = when (val osArch = System.getProperty("os.arch")) {
                 "x86", "i386", "ia-32", "i686", "x86_64", "amd64", "x64", "x86-64" ->
                     "test_android_emulator_x86_64"
@@ -88,12 +103,17 @@ tasks.register("ciAutomationTest") {
                 else ->
                     throw Error("Unexpected System.getProperty(\"os.arch\") = $osArch")
             }
-            it.setupAndroidSDK(avdName = avdName)
-            it.setupAndroidEmulator(avdName = avdName)
-            Thread { it.runAndroidEmulator(avdName = avdName) }.start()
-            it.waitAndroidEmulator()
-            it.killAndroidEmulator()
-            it.deleteAndroidEmulator()
+            androidSdkHelper.setupAndroidSDK(avdName = avdName)
+            androidSdkHelper.setupAndroidEmulator(avdName = avdName)
+            Thread { androidSdkHelper.runAndroidEmulator(avdName = avdName) }.start()
+            androidSdkHelper.waitAndroidEmulator()
+        }
+        try {
+            gradlew("test")
+        } finally {
+            androidSdkHelper.killAndroidEmulator()
+            androidSdkHelper.deleteAndroidEmulator()
+            runCatching { runExec(commands = listOf("pkill", "-9", "-f", "appium")) }
         }
     }
 }
@@ -158,6 +178,7 @@ tasks.register("ciAndroid") {
     group = ciGroup
     doLast {
         gradlew(
+            "clean",
             "assembleDebug",
             workingDirectory = File(rootDir, "Multiplatform-App")
         )
