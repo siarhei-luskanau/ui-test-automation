@@ -17,6 +17,7 @@ java {
 }
 
 dependencies {
+    implementation(kotlin("test"))
     implementation(libs.findLibrary("appium-java-client").get())
 }
 
