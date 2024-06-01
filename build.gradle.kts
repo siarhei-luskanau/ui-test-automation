@@ -41,61 +41,6 @@ tasks.register("devAll") {
         gradlew("ciAutomationTest")
     }
 }
-tasks.register("ciLint") {
-    group = ciGroup
-    doLast {
-        gradlew(
-            "lint",
-            workingDirectory = File(rootDir, "Multiplatform-App")
-        )
-    }
-}
-
-tasks.register("ciUnitTest") {
-    group = ciGroup
-    doLast {
-        gradlew(
-            ":composeApp:jvmTest",
-            // ":composeApp:jsBrowserTest",
-            // ":composeApp:wasmJsBrowserTest",
-            // ":composeApp:testReleaseUnitTest",
-            workingDirectory = File(rootDir, "Multiplatform-App")
-        )
-        when (val osArch = System.getProperty("os.arch")) {
-            "x86", "i386", "ia-32", "i686",
-            "x86_64", "amd64", "x64", "x86-64" -> ":composeApp:iosSimulatorX64Test"
-
-            "arm", "arm-v7", "armv7", "arm32",
-            "arm64", "arm-v8", "aarch64" -> ":composeApp:iosSimulatorArm64Test"
-
-            else -> throw Error(
-                "Unexpected System.getProperty(\"os.arch\") = $osArch"
-            )
-        }.let {
-            gradlew(it, workingDirectory = File(rootDir, "Multiplatform-App"))
-        }
-    }
-}
-
-tasks.register("ciDesktop") {
-    group = ciGroup
-    doLast {
-        gradlew(
-            ":composeApp:jvmJar",
-            workingDirectory = File(rootDir, "Multiplatform-App")
-        )
-    }
-}
-
-tasks.register("ciBrowser") {
-    group = ciGroup
-    doLast {
-        gradlew(
-            ":composeApp:jsMainClasses",
-            workingDirectory = File(rootDir, "Multiplatform-App")
-        )
-    }
-}
 
 tasks.register("ciAutomationTest") {
     group = ciGroup
@@ -150,6 +95,62 @@ tasks.register("ciAutomationTest") {
             it.killAndroidEmulator()
             it.deleteAndroidEmulator()
         }
+    }
+}
+
+tasks.register("ciLint") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            "lint",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+    }
+}
+
+tasks.register("ciUnitTest") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            ":composeApp:jvmTest",
+            // ":composeApp:jsBrowserTest",
+            // ":composeApp:wasmJsBrowserTest",
+            // ":composeApp:testReleaseUnitTest",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+        when (val osArch = System.getProperty("os.arch")) {
+            "x86", "i386", "ia-32", "i686",
+            "x86_64", "amd64", "x64", "x86-64" -> ":composeApp:iosSimulatorX64Test"
+
+            "arm", "arm-v7", "armv7", "arm32",
+            "arm64", "arm-v8", "aarch64" -> ":composeApp:iosSimulatorArm64Test"
+
+            else -> throw Error(
+                "Unexpected System.getProperty(\"os.arch\") = $osArch"
+            )
+        }.let {
+            gradlew(it, workingDirectory = File(rootDir, "Multiplatform-App"))
+        }
+    }
+}
+
+tasks.register("ciDesktop") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            ":composeApp:jvmJar",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
+    }
+}
+
+tasks.register("ciBrowser") {
+    group = ciGroup
+    doLast {
+        gradlew(
+            ":composeApp:jsMainClasses",
+            workingDirectory = File(rootDir, "Multiplatform-App")
+        )
     }
 }
 
@@ -220,7 +221,12 @@ fun runExec(
     commands: List<String>,
     inputStream: InputStream? = null,
     addToSystemEnvironment: Map<String, String>? = null
-): String = ByteArrayOutputStream().let { resultOutputStream ->
+): String = object : ByteArrayOutputStream() {
+    override fun write(p0: ByteArray, p1: Int, p2: Int) {
+        print(String(p0, p1, p2))
+        super.write(p0, p1, p2)
+    }
+}.let { resultOutputStream ->
     exec {
         commandLine = commands
         workingDir = rootDir
@@ -237,7 +243,7 @@ fun runExec(
         standardOutput = resultOutputStream
         println("commandLine: ${this.commandLine.joinToString(separator = " ")}")
     }.apply { println("ExecResult: $this") }
-    String(resultOutputStream.toByteArray()).trim().also { println(it) }
+    String(resultOutputStream.toByteArray())
 }
 
 fun gradlew(
