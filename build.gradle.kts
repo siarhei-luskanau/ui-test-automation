@@ -192,7 +192,8 @@ tasks.register("ciIos") {
                 .lines()
                 .filter {
                     listOf("iphone 15", "iphone 14").any { device -> it.contains(device, true) } &&
-                        it.contains("(") && it.contains(")")
+                        it.contains("(") &&
+                        it.contains(")")
                 }
                 .map { it.substring(startIndex = it.indexOf("(") + 1, endIndex = it.indexOf(")")) }
                 .firstOrNull()

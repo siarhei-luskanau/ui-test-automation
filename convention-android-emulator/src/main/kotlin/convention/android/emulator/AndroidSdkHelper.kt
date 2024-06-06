@@ -7,10 +7,7 @@ import java.net.URL
 import java.util.zip.ZipFile
 import org.apache.tools.ant.taskdefs.condition.Os
 
-class AndroidSdkHelper(
-    rootDir: File,
-    private val execWrapper: ExecWrapper
-) {
+class AndroidSdkHelper(rootDir: File, private val execWrapper: ExecWrapper) {
 
     private val androidSdkConfig = AndroidSdkConfig(rootDir = rootDir)
     private val addToSystemEnvironment = mapOf(
