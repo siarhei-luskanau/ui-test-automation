@@ -57,11 +57,6 @@ kotlin {
     }
 
     sourceSets {
-        all {
-            languageSettings {
-                optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
-            }
-        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -128,10 +123,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     buildFeatures {
+        // enables a Compose tooling support in the AndroidStudio
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
     }
 }
 

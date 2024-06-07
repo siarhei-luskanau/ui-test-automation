@@ -24,11 +24,11 @@ To run the application on iPhone device/simulator:
  - Or use [Kotlin Multiplatform Mobile plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform-mobile) for Android Studio
 Run iOS simulator UI tests: `./gradlew :composeApp:iosSimulatorArm64Test`
 
-### Experimental Browser (JS)
+### JS Browser (Experimental)
 Run the browser application: `./gradlew :composeApp:jsBrowserDevelopmentRun --continue`
 Run browser UI tests: `./gradlew :composeApp:jsBrowserTest`
 
-### Experimental Browser (Wasm)
+### Wasm Browser (Alpha)
 Run the browser application: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun --continue`
 Run browser UI tests: `./gradlew :composeApp:wasmJsBrowserTest`
 
