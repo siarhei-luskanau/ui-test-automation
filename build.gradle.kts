@@ -113,8 +113,8 @@ tasks.register("ciUnitTest") {
     doLast {
         gradlew(
             ":composeApp:jvmTest",
-            // ":composeApp:jsBrowserTest",
-            // ":composeApp:wasmJsBrowserTest",
+            ":composeApp:jsTest",
+            ":composeApp:wasmJsTest",
             // ":composeApp:testReleaseUnitTest",
             workingDirectory = File(rootDir, "Multiplatform-App")
         )
