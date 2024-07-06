@@ -4,7 +4,7 @@ appium-npm = "2.5.4"
 build-javaVersion = "VERSION_17"
 build-jvmTarget = "17"
 kotlin = "2.0.0"
-ktlint = "1.3.0"
+ktlint = "1.3.1"
 
 [libraries]
 appium-java-client = { module = "io.appium:java-client", version.ref = "appium" }
