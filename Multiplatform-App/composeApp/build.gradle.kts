@@ -18,19 +18,14 @@ kotlin {
             compileTaskProvider {
                 compilerOptions {
                     jvmTarget.set(JvmTarget.JVM_1_8)
+                    // https://jakewharton.com/gradle-toolchains-are-rarely-a-good-idea/#what-do-i-do
                     freeCompilerArgs.add("-Xjdk-release=${JavaVersion.VERSION_1_8}")
                 }
             }
         }
         // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
-            dependencies {
-                debugImplementation(libs.androidx.testManifest)
-                implementation(libs.androidx.junit4)
-            }
-        }
+        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
 
     jvm()
@@ -94,7 +89,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
 
         applicationId = "org.company.app.androidApp"
@@ -102,10 +97,6 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    sourceSets["main"].apply {
-        manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        res.srcDirs("src/androidMain/res")
     }
     // https://developer.android.com/studio/test/gradle-managed-devices
     @Suppress("UnstableApiUsage")
@@ -122,9 +113,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    buildFeatures {
-        // enables a Compose tooling support in the AndroidStudio
-        compose = true
+}
+
+// https://developer.android.com/develop/ui/compose/testing#setup
+dependencies {
+    androidTestImplementation(libs.androidx.uitest.junit4)
+    debugImplementation(libs.androidx.uitest.testManifest)
+    // temporary fix: https://youtrack.jetbrains.com/issue/CMP-5864
+    androidTestImplementation("androidx.test:monitor") {
+        version { strictly("1.6.1") }
     }
 }
 
@@ -138,8 +135,4 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
-}
-
-compose.experimental {
-    web.application {}
 }

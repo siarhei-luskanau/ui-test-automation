@@ -1,12 +1,14 @@
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.CanvasBasedWindow
+import androidx.compose.ui.window.ComposeViewport
 import org.company.app.App
 import org.jetbrains.skiko.wasm.onWasmReady
+import kotlinx.browser.document
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     onWasmReady {
-        CanvasBasedWindow("Multiplatform App") {
+        val body = document.body ?: return@onWasmReady
+        ComposeViewport(body) {
             App()
         }
     }

@@ -148,7 +148,7 @@ tasks.register("ciBrowser") {
     group = ciGroup
     doLast {
         gradlew(
-            ":composeApp:jsMainClasses",
+            ":composeApp:wasmJsMainClasses",
             workingDirectory = File(rootDir, "Multiplatform-App")
         )
     }
