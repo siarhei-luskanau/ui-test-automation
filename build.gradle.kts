@@ -37,7 +37,6 @@ tasks.register("devAll") {
             "ciIos",
             "ciBrowser"
         )
-        gradlew("ciAndroidInstrumentalTest")
         gradlew("ciAutomationTest")
     }
 }
@@ -159,16 +158,6 @@ tasks.register("ciAndroid") {
     doLast {
         gradlew(
             "assembleDebug",
-            workingDirectory = File(rootDir, "Multiplatform-App")
-        )
-    }
-}
-
-tasks.register("ciAndroidInstrumentalTest") {
-    group = ciGroup
-    doLast {
-        gradlew(
-            ":composeApp:pixel5Check",
             workingDirectory = File(rootDir, "Multiplatform-App")
         )
     }

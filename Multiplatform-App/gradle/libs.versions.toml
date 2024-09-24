@@ -1,10 +1,10 @@
 [versions]
 
 kotlin = "2.0.20"
-compose = "1.7.0-alpha03"
-agp = "8.5.2"
-androidx-activityCompose = "1.9.1"
-androidx-uiTest = "1.6.8"
+compose = "1.7.0-beta02"
+agp = "8.6.1"
+androidx-activityCompose = "1.9.2"
+androidx-uiTest = "1.7.2"
 
 [libraries]
 

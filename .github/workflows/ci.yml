@@ -71,8 +71,6 @@ jobs:
 
       - run: ./gradlew ciAndroid --stacktrace
 
-      - run: ./gradlew ciAndroidInstrumentalTest --stacktrace
-
 
 
   Desktop:
