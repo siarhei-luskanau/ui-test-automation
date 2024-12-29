@@ -1,5 +1,6 @@
 import convention.android.emulator.AndroidSdkHelper
 import convention.environment.setup.EnvironmentSetupManager
+import groovy.json.JsonSlurper
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
@@ -169,23 +170,36 @@ tasks.register("ciIos") {
         if (Os.isFamily(Os.FAMILY_MAC)) {
             runExec(listOf("brew", "install", "kdoctor"))
             runExec(listOf("kdoctor"))
-            val deviceId = runExec(
+            val devicesJson = runExec(
                 listOf(
                     "xcrun",
                     "simctl",
                     "list",
                     "devices",
-                    "available"
+                    "available",
+                    "-j"
                 )
             )
-                .lines()
-                .filter {
-                    listOf("iphone 15", "iphone 14").any { device -> it.contains(device, true) } &&
-                        it.contains("(") &&
-                        it.contains(")")
+
+            @Suppress("UNCHECKED_CAST")
+            val devicesList = (JsonSlurper().parseText(devicesJson) as Map<String, *>)
+                .let { it["devices"] as Map<String, *> }
+                .let { devicesMap ->
+                    devicesMap.keys
+                        .filter { it.startsWith("com.apple.CoreSimulator.SimRuntime.iOS") }
+                        .map { devicesMap[it] as List<*> }
                 }
-                .map { it.substring(startIndex = it.indexOf("(") + 1, endIndex = it.indexOf(")")) }
-                .firstOrNull()
+                .map { jsonArray -> jsonArray.map { it as Map<String, *> } }
+                .flatten()
+                .filter { it["isAvailable"] as Boolean }
+                .filter {
+                    listOf("iphone 1").any { device ->
+                        (it["name"] as String).contains(device, true)
+                    }
+                }
+            println("Devices:${devicesList.joinToString { "\n" + it["udid"] + ": " + it["name"] }}")
+            val device = devicesList.firstOrNull()
+            println("Selected:\n${device?.get("udid")}: ${device?.get("name")}")
             runExec(
                 listOf(
                     "xcodebuild",
@@ -198,7 +212,7 @@ tasks.register("ciIos") {
                     "OBJROOT=${rootDir.path}/build/ios",
                     "SYMROOT=${rootDir.path}/build/ios",
                     "-destination",
-                    "id=$deviceId",
+                    "id=${device?.get("udid")}",
                     "-allowProvisioningDeviceRegistration",
                     "-allowProvisioningUpdates"
                 )
@@ -217,6 +231,7 @@ fun runExec(
         super.write(p0, p1, p2)
     }
 }.let { resultOutputStream ->
+    @Suppress("DEPRECATION")
     exec {
         commandLine = commands
         workingDir = rootDir
@@ -241,7 +256,7 @@ fun gradlew(
     addToSystemProperties: Map<String, String>? = null,
     workingDirectory: File? = null
 ) {
-    exec {
+    providers.exec {
         executable = File(
             project.rootDir,
             if (Os.isFamily(Os.FAMILY_WINDOWS)) "gradlew.bat" else "gradlew"
