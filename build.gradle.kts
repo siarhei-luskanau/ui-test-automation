@@ -299,5 +299,5 @@ fun gradlew(
             }
         }
         println("commandLine: ${this.commandLine}")
-    }.apply { println("ExecResult: $this") }
+    }.apply { println("ExecResult: ${this.result.get()}") }
 }
