@@ -6,14 +6,15 @@ import java.io.InputStream
 import java.net.URL
 import java.util.zip.ZipFile
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.file.ProjectLayout
 
-class AndroidSdkHelper(rootDir: File, private val execWrapper: ExecWrapper) {
+class AndroidSdkHelper(projectLayout: ProjectLayout, private val execWrapper: ExecWrapper) {
 
-    private val androidSdkConfig = AndroidSdkConfig(rootDir = rootDir)
+    private val androidSdkConfig = AndroidSdkConfig(projectLayout = projectLayout)
     private val addToSystemEnvironment = mapOf(
         "HOME" to System.getenv("HOME"),
         "ANDROID_SDK_HOME" to androidSdkConfig.sdkDirPath,
-        "ANDROID_AVD_HOME" to "$rootDir/.android/avd"
+        "ANDROID_AVD_HOME" to "${projectLayout.projectDirectory.asFile}/.android/avd"
     ).filterValues { it.isNotEmpty() }
 
     fun setupAndroidCmdlineTools() {
@@ -51,11 +52,15 @@ class AndroidSdkHelper(rootDir: File, private val execWrapper: ExecWrapper) {
         val destDirectory = File(commandlinetoolsPath).parentFile
         ZipFile(commandlinetoolsPath).use { zip ->
             zip.entries().asSequence().forEach { entry ->
-                zip.getInputStream(entry).use { input ->
-                    val outputFile = File(destDirectory, entry.name)
-                    outputFile.parentFile.mkdirs()
-                    outputFile.outputStream().use { input.copyTo(it) }
-                    outputFile.setExecutable(true)
+                if (entry.isDirectory) {
+                    File(destDirectory, entry.name).mkdirs()
+                } else {
+                    zip.getInputStream(entry).use { input ->
+                        val outputFile = File(destDirectory, entry.name)
+                        outputFile.parentFile.mkdirs()
+                        outputFile.outputStream().use { input.copyTo(it) }
+                        outputFile.setExecutable(true)
+                    }
                 }
             }
         }
