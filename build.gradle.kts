@@ -1,5 +1,5 @@
 import convention.android.emulator.AndroidSdkHelper
-import convention.environment.setup.EnvironmentSetupManager
+import convention.environment.setup.setupDependencies
 import groovy.json.JsonSlurper
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -25,12 +25,13 @@ val ciGroup = "CI_GRADLE"
 
 tasks.register("devAll") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        gradlew(
+        injected.gradlew(
             "clean",
             "ktlintFormat"
         )
-        gradlew(
+        injected.gradlew(
             "ciLint",
             "ciUnitTest",
             "ciAndroid",
@@ -38,44 +39,33 @@ tasks.register("devAll") {
             "ciIos",
             "ciBrowser"
         )
-        gradlew("ciAutomationTest")
+        injected.gradlew("ciAutomationTest")
     }
 }
 
 tasks.register("ciAutomationTest") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        val environmentSetupExecWrapper: convention.environment.setup.ExecWrapper =
-            object : convention.environment.setup.ExecWrapper {
-                override fun exec(
-                    commandLine: List<String>,
-                    inputStream: InputStream?,
-                    addToSystemEnvironment: Map<String, String>?
-                ): String = runExec(
-                    commands = commandLine,
-                    inputStream = inputStream,
-                    addToSystemEnvironment = addToSystemEnvironment
-                )
-            }
-        EnvironmentSetupManager(execWrapper = environmentSetupExecWrapper).setupDependencies(
-            appiumVersion = libs.versions.appium.npm.get()
+        setupDependencies(
+            runExec = { injected.runExec(commands = it) },
+            appiumVersion = "2.5.4"
+            // appiumVersion = libs.versions.appium.npm.get()
         )
 
-        val androidEmulatorExecWrapper: convention.android.emulator.ExecWrapper =
-            object : convention.android.emulator.ExecWrapper {
+        AndroidSdkHelper(
+            projectLayout = injected.projectLayout,
+            execWrapper = object : convention.android.emulator.ExecWrapper {
                 override fun exec(
                     commandLine: List<String>,
                     inputStream: InputStream?,
                     addToSystemEnvironment: Map<String, String>?
-                ): String = runExec(
+                ): String = injected.runExec(
                     commands = commandLine,
                     inputStream = inputStream,
                     addToSystemEnvironment = addToSystemEnvironment
                 )
             }
-        AndroidSdkHelper(
-            rootDir = rootDir,
-            execWrapper = androidEmulatorExecWrapper
         ).also {
             it.setupAndroidCmdlineTools()
             val avdName = when (val osArch = System.getProperty("os.arch")) {
@@ -100,23 +90,25 @@ tasks.register("ciAutomationTest") {
 
 tasks.register("ciLint") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        gradlew(
+        injected.gradlew(
             "lint",
-            workingDirectory = File(rootDir, "Multiplatform-App")
+            workingDirectory = "Multiplatform-App"
         )
     }
 }
 
 tasks.register("ciUnitTest") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        gradlew(
+        injected.gradlew(
             ":composeApp:jvmTest",
             // ":composeApp:jsBrowserTest",
             // ":composeApp:wasmJsBrowserTest",
             // ":composeApp:testReleaseUnitTest",
-            workingDirectory = File(rootDir, "Multiplatform-App")
+            workingDirectory = "Multiplatform-App"
         )
         when (val osArch = System.getProperty("os.arch")) {
             "x86", "i386", "ia-32", "i686",
@@ -129,48 +121,52 @@ tasks.register("ciUnitTest") {
                 "Unexpected System.getProperty(\"os.arch\") = $osArch"
             )
         }.let {
-            gradlew(it, workingDirectory = File(rootDir, "Multiplatform-App"))
+            injected.gradlew(it, workingDirectory = "Multiplatform-App")
         }
     }
 }
 
 tasks.register("ciDesktop") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        gradlew(
+        injected.gradlew(
             ":composeApp:jvmJar",
-            workingDirectory = File(rootDir, "Multiplatform-App")
+            workingDirectory = "Multiplatform-App"
         )
     }
 }
 
 tasks.register("ciBrowser") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        gradlew(
+        injected.gradlew(
             ":composeApp:wasmJsMainClasses",
-            workingDirectory = File(rootDir, "Multiplatform-App")
+            workingDirectory = "Multiplatform-App"
         )
     }
 }
 
 tasks.register("ciAndroid") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
-        gradlew(
+        injected.gradlew(
             "assembleDebug",
-            workingDirectory = File(rootDir, "Multiplatform-App")
+            workingDirectory = "Multiplatform-App"
         )
     }
 }
 
 tasks.register("ciIos") {
     group = ciGroup
+    val injected = project.objects.newInstance<Injected>()
     doLast {
         if (Os.isFamily(Os.FAMILY_MAC)) {
-            runExec(listOf("brew", "install", "kdoctor"))
-            runExec(listOf("kdoctor"))
-            val devicesJson = runExec(
+            injected.runExec(listOf("brew", "install", "kdoctor"))
+            injected.runExec(listOf("kdoctor"))
+            val devicesJson = injected.runExec(
                 listOf(
                     "xcrun",
                     "simctl",
@@ -200,17 +196,18 @@ tasks.register("ciIos") {
             println("Devices:${devicesList.joinToString { "\n" + it["udid"] + ": " + it["name"] }}")
             val device = devicesList.firstOrNull()
             println("Selected:\n${device?.get("udid")}: ${device?.get("name")}")
-            runExec(
+            val rootDirPath = injected.projectLayout.projectDirectory.asFile.path
+            injected.runExec(
                 listOf(
                     "xcodebuild",
                     "-project",
-                    "${rootDir.path}/Multiplatform-App/iosApp/iosApp.xcodeproj",
+                    "$rootDirPath/Multiplatform-App/iosApp/iosApp.xcodeproj",
                     "-scheme",
                     "iosApp",
                     "-configuration",
                     "Debug",
-                    "OBJROOT=${rootDir.path}/build/ios",
-                    "SYMROOT=${rootDir.path}/build/ios",
+                    "OBJROOT=$rootDirPath/build/ios",
+                    "SYMROOT=$rootDirPath/build/ios",
                     "-destination",
                     "id=${device?.get("udid")}",
                     "-allowProvisioningDeviceRegistration",
@@ -221,83 +218,95 @@ tasks.register("ciIos") {
     }
 }
 
-fun runExec(
-    commands: List<String>,
-    inputStream: InputStream? = null,
-    addToSystemEnvironment: Map<String, String>? = null
-): String = object : ByteArrayOutputStream() {
-    override fun write(p0: ByteArray, p1: Int, p2: Int) {
-        print(String(p0, p1, p2))
-        super.write(p0, p1, p2)
+abstract class Injected {
+
+    @get:Inject
+    abstract val fs: FileSystemOperations
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @get:Inject
+    abstract val projectLayout: ProjectLayout
+
+    fun runExec(
+        commands: List<String>,
+        inputStream: InputStream? = null,
+        addToSystemEnvironment: Map<String, String>? = null
+    ): String = object : ByteArrayOutputStream() {
+        override fun write(p0: ByteArray, p1: Int, p2: Int) {
+            print(String(p0, p1, p2))
+            super.write(p0, p1, p2)
+        }
+    }.let { resultOutputStream ->
+        execOperations.exec {
+            commandLine = commands
+            workingDir = projectLayout.projectDirectory.asFile
+            environment = environment.toMutableMap().apply {
+                System.getenv("HOME")?.also { put("HOME", it) }
+                if (System.getenv("JAVA_HOME") == null) {
+                    System.getProperty("java.home")?.let { javaHome ->
+                        put("JAVA_HOME", javaHome)
+                    }
+                }
+                addToSystemEnvironment?.also { putAll(addToSystemEnvironment) }
+            }
+            inputStream?.also { standardInput = inputStream }
+            standardOutput = resultOutputStream
+            println("commandLine: ${this.commandLine.joinToString(separator = " ")}")
+        }.apply { println("ExecResult: $this") }
+        String(resultOutputStream.toByteArray())
     }
-}.let { resultOutputStream ->
-    @Suppress("DEPRECATION")
-    exec {
-        commandLine = commands
-        workingDir = rootDir
-        environment = environment.toMutableMap().apply {
-            System.getenv("HOME")?.also { put("HOME", it) }
+
+    fun gradlew(
+        vararg tasks: String,
+        addToSystemProperties: Map<String, String>? = null,
+        workingDirectory: String? = null
+    ) {
+        execOperations.exec {
+            commandLine = mutableListOf<String>().also { mutableArgs ->
+                mutableArgs.add(
+                    "./" +
+                        // if (workingDirectory != null) "$workingDirectory/" else ""     +
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) "gradlew.bat" else "gradlew"
+                )
+                mutableArgs.addAll(tasks)
+                addToSystemProperties?.toList()?.map { "-D${it.first}=${it.second}" }?.let {
+                    mutableArgs.addAll(it)
+                }
+                mutableArgs.add("--stacktrace")
+            }
+            workingDirectory?.also {
+                workingDir = File(projectLayout.projectDirectory.asFile, workingDirectory)
+            }
+            val sdkDirPath = Properties().apply {
+                val propertiesFile = projectLayout.projectDirectory.file("local.properties").asFile
+                if (propertiesFile.exists()) {
+                    load(propertiesFile.inputStream())
+                }
+            }.getProperty("sdk.dir")
+            if (sdkDirPath != null) {
+                val platformToolsDir = "$sdkDirPath${File.separator}platform-tools"
+                val pathEnvironment = System.getenv("PATH").orEmpty()
+                if (!pathEnvironment.contains(platformToolsDir)) {
+                    environment = environment.toMutableMap().apply {
+                        put("PATH", "$platformToolsDir:$pathEnvironment")
+                    }
+                }
+            }
             if (System.getenv("JAVA_HOME") == null) {
                 System.getProperty("java.home")?.let { javaHome ->
-                    put("JAVA_HOME", javaHome)
+                    environment = environment.toMutableMap().apply {
+                        put("JAVA_HOME", javaHome)
+                    }
                 }
             }
-            addToSystemEnvironment?.also { putAll(addToSystemEnvironment) }
-        }
-        inputStream?.also { standardInput = inputStream }
-        standardOutput = resultOutputStream
-        println("commandLine: ${this.commandLine.joinToString(separator = " ")}")
-    }.apply { println("ExecResult: $this") }
-    String(resultOutputStream.toByteArray())
-}
-
-fun gradlew(
-    vararg tasks: String,
-    addToSystemProperties: Map<String, String>? = null,
-    workingDirectory: File? = null
-) {
-    providers.exec {
-        executable = File(
-            project.rootDir,
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) "gradlew.bat" else "gradlew"
-        )
-            .also { it.setExecutable(true) }
-            .absolutePath
-        args = mutableListOf<String>().also { mutableArgs ->
-            mutableArgs.addAll(tasks)
-            addToSystemProperties?.toList()?.map { "-D${it.first}=${it.second}" }?.let {
-                mutableArgs.addAll(it)
-            }
-            mutableArgs.add("--stacktrace")
-        }
-        workingDirectory?.also { workingDir = workingDirectory }
-        val sdkDirPath = Properties().apply {
-            val propertiesFile = File(rootDir, "local.properties")
-            if (propertiesFile.exists()) {
-                load(propertiesFile.inputStream())
-            }
-        }.getProperty("sdk.dir")
-        if (sdkDirPath != null) {
-            val platformToolsDir = "$sdkDirPath${File.separator}platform-tools"
-            val pathEnvironment = System.getenv("PATH").orEmpty()
-            if (!pathEnvironment.contains(platformToolsDir)) {
+            if (System.getenv("ANDROID_HOME") == null) {
                 environment = environment.toMutableMap().apply {
-                    put("PATH", "$platformToolsDir:$pathEnvironment")
+                    put("ANDROID_HOME", sdkDirPath)
                 }
             }
-        }
-        if (System.getenv("JAVA_HOME") == null) {
-            System.getProperty("java.home")?.let { javaHome ->
-                environment = environment.toMutableMap().apply {
-                    put("JAVA_HOME", javaHome)
-                }
-            }
-        }
-        if (System.getenv("ANDROID_HOME") == null) {
-            environment = environment.toMutableMap().apply {
-                put("ANDROID_HOME", sdkDirPath)
-            }
-        }
-        println("commandLine: ${this.commandLine}")
-    }.apply { println("ExecResult: ${this.result.get()}") }
+            println("commandLine: ${this.commandLine}")
+        }.apply { println("ExecResult: ${this.exitValue}") }
+    }
 }

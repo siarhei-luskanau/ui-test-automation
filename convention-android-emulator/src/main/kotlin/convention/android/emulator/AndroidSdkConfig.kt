@@ -3,9 +3,10 @@ package convention.android.emulator
 import java.io.File
 import java.util.Properties
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.file.ProjectLayout
 import org.gradle.kotlin.dsl.provideDelegate
 
-internal class AndroidSdkConfig(private val rootDir: File) {
+internal class AndroidSdkConfig(private val projectLayout: ProjectLayout) {
 
     val sdkDirPath: String by lazy {
         readAndroidSdkFromLocalProperties()
@@ -48,14 +49,14 @@ internal class AndroidSdkConfig(private val rootDir: File) {
     private fun sdkFile(vararg path: String) = File(sdkDirPath, path.joinToString(File.separator))
 
     private fun readAndroidSdkFromLocalProperties(): String? = Properties().apply {
-        val propertiesFile = File(rootDir.parentFile, LOCAL_PROPERTIES_FILE_NAME)
+        val propertiesFile = File(projectLayout.projectDirectory.asFile, LOCAL_PROPERTIES_FILE_NAME)
         if (propertiesFile.exists()) {
             load(propertiesFile.inputStream())
         }
     }.getProperty(SDK_DIR)
 
     private fun writeAndroidSdkToLocalProperties() {
-        val propertiesFile = File(rootDir.parentFile, LOCAL_PROPERTIES_FILE_NAME)
+        val propertiesFile = File(projectLayout.projectDirectory.asFile, LOCAL_PROPERTIES_FILE_NAME)
         val properties = Properties().apply {
             if (propertiesFile.exists()) {
                 load(propertiesFile.inputStream())
