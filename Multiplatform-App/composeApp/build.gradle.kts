@@ -13,7 +13,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(11)
     androidTarget {
         // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
         instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
@@ -64,10 +63,6 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
-        }
-
-        jsMain.dependencies {
-            implementation(compose.html.core)
         }
     }
 }

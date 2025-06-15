@@ -1,11 +1,11 @@
 [versions]
 
-kotlin = "2.1.20"
-compose = "1.8.0"
-agp = "8.10.0"
+kotlin = "2.1.21"
+compose = "1.8.1"
+agp = "8.9.3"
 androidx-activityCompose = "1.10.1"
-androidx-uiTest = "1.7.8"
-hotReload = "1.0.0-alpha08"
+androidx-uiTest = "1.8.1"
+hotReload = "1.0.0-alpha09"
 
 [libraries]
 
