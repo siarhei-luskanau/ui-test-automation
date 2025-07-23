@@ -5,7 +5,7 @@ compose = "1.8.2"
 agp = "8.10.0"
 androidx-activityCompose = "1.10.1"
 androidx-uiTest = "1.8.1"
-hotReload = "1.0.0-alpha09"
+hotReload = "1.0.0-beta04"
 
 [libraries]
 
