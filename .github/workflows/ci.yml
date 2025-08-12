@@ -21,7 +21,9 @@ jobs:
       contents: write
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
 
       - uses: actions/setup-java@v4
         with:
@@ -66,7 +68,7 @@ jobs:
             experimental: false
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Enable KVM group perms
         if: contains(matrix.os, 'ubuntu')
@@ -92,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Enable KVM group perms
         run: |
@@ -119,7 +121,7 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v4
         with:
@@ -140,7 +142,7 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v4
         with:
@@ -157,7 +159,7 @@ jobs:
     runs-on: macos-latest
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v4
         with:
@@ -175,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Enable KVM group perms
         run: |
