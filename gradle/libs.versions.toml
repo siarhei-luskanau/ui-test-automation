@@ -3,7 +3,7 @@ appium = "10.0.0"
 appium-npm = "2.5.4"
 build-javaVersion = "VERSION_21"
 build-jvmTarget = "21"
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 ktlint = "1.7.1"
 
 [libraries]
