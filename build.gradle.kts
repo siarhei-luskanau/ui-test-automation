@@ -29,8 +29,7 @@ tasks.register("ciAutomationTest") {
     doLast {
         setupDependencies(
             runExec = { injected.runExec(commands = it) },
-            appiumVersion = "2.5.4"
-            // appiumVersion = libs.versions.appium.npm.get()
+            appiumVersion = libs.versions.appium.npm.get()
         )
 
         AndroidSdkHelper(
