@@ -26,10 +26,11 @@ val ciGroup = "CI_GRADLE"
 tasks.register("ciAutomationTest") {
     group = ciGroup
     val injected = project.objects.newInstance<Injected>()
+    val libs = project.extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
     doLast {
         setupDependencies(
             runExec = { injected.runExec(commands = it) },
-            appiumVersion = libs.versions.appium.npm.get()
+            appiumVersion = libs.findVersion("appium-npm").get().requiredVersion
         )
 
         AndroidSdkHelper(
@@ -59,10 +60,12 @@ tasks.register("ciAutomationTest") {
             }
             it.setupAndroidSDK(avdName = avdName)
             it.setupAndroidEmulator(avdName = avdName)
-            Thread { it.runAndroidEmulator(avdName = avdName) }.start()
+            val emulatorThread = Thread { it.runAndroidEmulator(avdName = avdName) }
+            emulatorThread.start()
             it.waitAndroidEmulator()
             it.killAndroidEmulator()
             it.deleteAndroidEmulator()
+            emulatorThread.join()
         }
     }
 }

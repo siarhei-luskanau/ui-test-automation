@@ -1,6 +1,6 @@
 [versions]
 
-kotlin = "2.2.20-Beta2"
+kotlin = "2.2.20-RC"
 compose = "1.9.0-beta03"
 agp = "8.10.0"
 androidx-activityCompose = "1.10.1"
