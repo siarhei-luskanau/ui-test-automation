@@ -86,7 +86,8 @@ tasks.register("ciDesktop") {
     val injected = project.objects.newInstance<Injected>()
     doLast {
         injected.gradlew(
-            ":composeApp:jvmJar",
+            ":desktopApp:build",
+            ":desktopApp:jar",
             workingDirectory = "Multiplatform-App"
         )
     }
@@ -97,7 +98,7 @@ tasks.register("ciBrowser") {
     val injected = project.objects.newInstance<Injected>()
     doLast {
         injected.gradlew(
-            ":composeApp:wasmJsMainClasses",
+            ":webApp:wasmJsMainClasses",
             workingDirectory = "Multiplatform-App"
         )
     }
