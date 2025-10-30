@@ -1,5 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.reload.gradle.ComposeHotRun
 
 plugins {
     alias(libs.plugins.compose.compiler)
@@ -34,8 +33,4 @@ compose.desktop {
             }
         }
     }
-}
-
-tasks.withType<ComposeHotRun>().configureEach {
-    mainClass = "MainKt"
 }
