@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.ExperimentalComposeLibrary
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -16,6 +17,7 @@ kotlin {
         compileSdk = 36
         minSdk = 23
         androidResources.enable = true
+        compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
     }
 
     jvm()
@@ -56,6 +58,11 @@ kotlin {
         .withType<KotlinNativeTarget>()
         .matching { it.konanTarget.family.isAppleFamily }
         .configureEach {
-            binaries { framework { baseName = "SharedUI" } }
+            binaries {
+                framework {
+                    baseName = "SharedUI"
+                    isStatic = true
+                }
+            }
         }
 }
