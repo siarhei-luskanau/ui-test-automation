@@ -4,12 +4,11 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.compose.hot.reload)
 }
 
 dependencies {
     implementation(project(":sharedUI"))
-    implementation(compose.ui)
+    implementation(libs.compose.ui)
 }
 
 compose.desktop {
