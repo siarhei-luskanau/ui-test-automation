@@ -1,4 +1,4 @@
-package org.company.app
+package org.company.app.androidApp
 
 import android.app.Activity
 import android.os.Bundle
@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsControllerCompat
+import org.company.app.App
 
 class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
