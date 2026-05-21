@@ -10,8 +10,11 @@ plugins {
 }
 
 kotlin {
-    androidTarget {
-        // We need the deprecated target to have working previews
+    android {
+        namespace = "org.company.app"
+        compileSdk = 36
+        minSdk = 23
+        androidResources.enable = true
         compilerOptions { jvmTarget = JvmTarget.JVM_17 }
     }
 
@@ -62,16 +65,5 @@ kotlin {
 }
 
 dependencies {
-    debugImplementation(libs.compose.ui.tooling)
-}
-android {
-    namespace = "org.company.app"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 23
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
+    androidRuntimeClasspath(libs.compose.ui.tooling)
 }
