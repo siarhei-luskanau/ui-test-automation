@@ -108,11 +108,7 @@ jobs:
 
 
   Desktop:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     steps:
 
       - uses: actions/checkout@v6
@@ -129,11 +125,7 @@ jobs:
 
 
   Browser:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     steps:
 
       - uses: actions/checkout@v6
