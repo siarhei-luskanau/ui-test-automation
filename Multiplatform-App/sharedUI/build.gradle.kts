@@ -22,8 +22,14 @@ kotlin {
         compilerOptions { jvmTarget = JvmTarget.JVM_17 }
     }
 
-    js { browser() }
-    wasmJs { browser() }
+    js {
+        browser()
+        binaries.executable()
+    }
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
 
     iosArm64()
     iosSimulatorArm64()
