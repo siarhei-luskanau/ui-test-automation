@@ -43,23 +43,18 @@ jobs:
 
   MP_Tests:
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         gradle-tasks: [
+          "jsBrowserTest",
           "jvmTest",
           "wasmJsBrowserTest"
         ]
         os: [ ubuntu-latest ]
-        experimental: [ false ]
         include:
-          - gradle-tasks: "jsBrowserTest"
-            os: ubuntu-latest
-            experimental: true
           - gradle-tasks: "iosSimulatorArm64Test"
             os: macOS-26
-            experimental: false
     steps:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
