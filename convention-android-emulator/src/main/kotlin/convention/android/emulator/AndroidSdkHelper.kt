@@ -112,7 +112,6 @@ class AndroidSdkHelper(projectLayout: ProjectLayout, private val execWrapper: Ex
         execWrapper.exec(
             commandLine = mutableListOf(
                 androidSdkConfig.sdkmanager.absolutePath,
-                "tools",
                 "platform-tools",
                 "build-tools;${AndroidSdkConst.BUILD_TOOLS_VERSION}",
                 "platforms;android-${AndroidSdkConst.PLATFORM}"
