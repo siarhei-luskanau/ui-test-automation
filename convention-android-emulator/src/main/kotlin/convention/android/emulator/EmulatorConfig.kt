@@ -7,7 +7,7 @@ data class EmulatorConfig(
     val port: String
 )
 
-val ANDROID_EMULATORS = "system-images;android-${AndroidSdkConst.EMULATOR};google_apis"
+val ANDROID_EMULATORS = "system-images;android-${AndroidSdkConst.PLATFORM};google_apis_ps16k"
     .let { baseSystemImage ->
         listOf(
             EmulatorConfig(
