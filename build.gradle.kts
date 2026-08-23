@@ -8,7 +8,7 @@ import java.util.Properties
 import org.apache.tools.ant.taskdefs.condition.Os
 
 println("gradle.startParameter.taskNames: ${gradle.startParameter.taskNames}")
-System.getProperties().forEach { key, value -> println("System.getProperties(): $key=$value") }
+System.getProperties().forEach { (key, value) -> println("System.getProperties(): $key=$value") }
 System.getenv().forEach { (key, value) -> println("System.getenv(): $key=$value") }
 
 plugins {
@@ -32,6 +32,21 @@ tasks.register("ciAutomationTest") {
             runExec = { injected.runExec(commands = it) },
             appiumVersion = libs.findVersion("appium-npm").get().requiredVersion
         )
+
+        runCatching { injected.runExec(commands = listOf("pkill", "-9", "-f", "appium")) }
+        Thread {
+            runCatching {
+                injected.runExec(
+                    commands = listOf(
+                        "appium",
+                        "--address",
+                        "127.0.0.1",
+                        "--port",
+                        "4723"
+                    )
+                )
+            }
+        }.start()
 
         AndroidSdkHelper(
             projectLayout = injected.projectLayout,
@@ -63,9 +78,14 @@ tasks.register("ciAutomationTest") {
             val emulatorThread = Thread { it.runAndroidEmulator(avdName = avdName) }
             emulatorThread.start()
             it.waitAndroidEmulator()
-            it.killAndroidEmulator()
-            it.deleteAndroidEmulator()
-            emulatorThread.join()
+            try {
+                injected.gradlew("assembleDebug", workingDirectory = "Multiplatform-App")
+                injected.gradlew("test")
+            } finally {
+                it.killAndroidEmulator()
+                it.deleteAndroidEmulator()
+                emulatorThread.join()
+            }
         }
     }
 }
