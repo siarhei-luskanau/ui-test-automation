@@ -42,6 +42,7 @@ jobs:
 
 
   MP_Tests:
+    needs: [ Android, Desktop, Browser, iOS ]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -80,6 +81,7 @@ jobs:
 
 
   Android:
+    needs: Lint
     runs-on: ubuntu-latest
     steps:
 
@@ -103,6 +105,7 @@ jobs:
 
 
   Desktop:
+    needs: Lint
     runs-on: ubuntu-latest
     steps:
 
@@ -120,6 +123,7 @@ jobs:
 
 
   Browser:
+    needs: Lint
     runs-on: ubuntu-latest
     steps:
 
@@ -137,6 +141,7 @@ jobs:
 
 
   iOS:
+    needs: Lint
     runs-on: macOS-26
     steps:
 
