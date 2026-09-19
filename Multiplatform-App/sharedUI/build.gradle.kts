@@ -24,11 +24,11 @@ kotlin {
 
     js {
         browser()
-        binaries.executable()
+        binaries.executable() // required for tests
     }
     wasmJs {
         browser()
-        binaries.executable()
+        binaries.executable() // required for tests
     }
 
     iosArm64()

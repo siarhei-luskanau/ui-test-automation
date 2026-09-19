@@ -1,6 +1,6 @@
 [versions]
 
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 compose-multiplatform = "1.12.0"
 material3 = "1.12.0-alpha03"
 agp = "9.1.1"
